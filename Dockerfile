@@ -1,0 +1,117 @@
+ARG BASE_CONTAINER=nvcr.io/nvidia/deepstream-l4t:6.0.1-samples
+FROM $BASE_CONTAINER as base
+
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    libssl-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+FROM base as builder
+
+# Cmake
+WORKDIR /tmp
+RUN wget https://github.com/Kitware/CMake/releases/download/v3.19.4/cmake-3.19.4.tar.gz
+RUN tar xvf cmake-3.19.4.tar.gz
+WORKDIR /tmp/cmake-3.19.4/
+RUN mkdir /cmake
+RUN ./configure --prefix=/cmake
+RUN make -j$(nproc)
+RUN make install
+
+FROM base
+
+COPY --from=builder /cmake /cmake
+
+# setup environment
+ENV CUDA_HOME="/usr/local/cuda"
+ENV PATH="/usr/local/cuda/bin:${PATH}"
+ENV LD_LIBRARY_PATH="/usr/local/cuda/lib64:${LD_LIBRARY_PATH}"
+ENV LLVM_CONFIG="/usr/bin/llvm-config-9"
+ARG MAKEFLAGS=-j$(nproc) 
+
+# Install dependencies
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    rsyslog git \
+    tzdata \
+    libcurl4-openssl-dev \
+    ca-certificates \
+    libgstrtspserver-1.0-dev \
+    gstreamer1.0-plugins-good \
+    libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev \
+    libjson-glib-dev uuid-dev \
+    python3-pip \
+    python3-dev \
+    python3-matplotlib \
+    gfortran \
+    cmake \
+    curl \
+    liblapack-dev \
+    libblas-dev \
+    libhdf5-serial-dev \
+    hdf5-tools \
+    libhdf5-dev \
+    zlib1g-dev \
+    zip \
+    libopenmpi2 \
+    openmpi-bin \
+    openmpi-common \
+    protobuf-compiler \
+    libprotoc-dev \
+    llvm-9 \
+    llvm-9-dev \
+    file \
+    tar \
+    libatlas-base-dev \
+    libavcodec-dev \
+    libavformat-dev \
+    libavresample-dev \
+    libdc1394-22-dev \
+    libeigen3-dev \
+    libglew-dev \
+    libgstreamer-plugins-good1.0-dev \
+    libgtk-3-dev \
+    libjpeg-dev \
+    libjpeg8-dev \
+    libjpeg-turbo8-dev \
+    liblapacke-dev \
+    libopenblas-dev \
+    libpng-dev \
+    libpostproc-dev \
+    libswscale-dev \
+    libtbb-dev \
+    libtbb2 \
+    libtesseract-dev \
+    libtiff-dev \
+    libv4l-dev \
+    libxine2-dev \
+    libxvidcore-dev \
+    libx264-dev \
+    libgtkglext1 \
+    libgtkglext1-dev \
+    qv4l2 \
+    v4l-utils \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt autoremove \
+    && apt-get clean
+
+# Install OpenCV (with CUDA)
+ARG OPENCV_URL=https://nvidia.box.com/shared/static/5v89u6g5rb62fpz4lh0rz531ajo2t5ef.gz
+ARG OPENCV_DEB=OpenCV-4.5.0-aarch64.tar.gz
+
+WORKDIR /tmp
+RUN mkdir opencv && \
+    cd opencv && \
+    wget --quiet --show-progress --progress=bar:force:noscroll --no-check-certificate ${OPENCV_URL} -O ${OPENCV_DEB} && \
+    tar -xzvf ${OPENCV_DEB} && \
+    dpkg -i --force-depends *.deb && \
+    apt-get update && \
+    apt-get install -y -f --no-install-recommends && \
+    dpkg -i *.deb && \
+    rm -rf /var/lib/apt/lists/* && \
+    apt-get clean && \
+    cd ../ && \
+    rm -rf opencv
+
+WORKDIR /app
