@@ -20,14 +20,14 @@ FROM base as builder
 WORKDIR /tmp
 RUN wget https://github.com/Kitware/CMake/releases/download/v3.19.4/cmake-3.19.4.tar.gz \
     && tar xvf cmake-3.19.4.tar.gz \
-    && rm cmake-3.19.4.tar.gz
-WORKDIR /tmp/cmake-3.19.4/
-RUN mkdir /cmake \
+    && rm cmake-3.19.4.tar.gz \
+    && cd /tmp/cmake-3.19.4/ \
+    && mkdir /cmake \
     && ./configure --prefix=/cmake \
     && make -j$(nproc) \
-    && make install
-WORKDIR /tmp
-RUN rm -rf /tmp/cmake-3.19.4/
+    && make install \
+    && cd /tmp \
+    && rm -rf /tmp/cmake-3.19.4/
 
 FROM base
 
