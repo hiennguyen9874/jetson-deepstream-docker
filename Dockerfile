@@ -117,4 +117,4 @@ RUN mkdir opencv && \
     cd ../ && \
     rm -rf opencv
 
-WORKDIR /app
+WORKDIR /opt/nvidia/deepstream/deepstream-6.0
