@@ -11,13 +11,16 @@ FROM base as builder
 
 # Cmake
 WORKDIR /tmp
-RUN wget https://github.com/Kitware/CMake/releases/download/v3.19.4/cmake-3.19.4.tar.gz
-RUN tar xvf cmake-3.19.4.tar.gz
+RUN wget https://github.com/Kitware/CMake/releases/download/v3.19.4/cmake-3.19.4.tar.gz \
+    && tar xvf cmake-3.19.4.tar.gz \
+    && rm cmake-3.19.4.tar.gz
 WORKDIR /tmp/cmake-3.19.4/
-RUN mkdir /cmake
-RUN ./configure --prefix=/cmake
-RUN make -j$(nproc)
-RUN make install
+RUN mkdir /cmake \
+    && ./configure --prefix=/cmake \
+    && make -j$(nproc) \
+    && make install
+WORKDIR /tmp
+RUN rm -rf /tmp/cmake-3.19.4/
 
 FROM base
 
