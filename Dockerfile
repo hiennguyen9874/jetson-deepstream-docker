@@ -1,6 +1,13 @@
 ARG BASE_CONTAINER=nvcr.io/nvidia/deepstream-l4t:6.0.1-samples
 FROM $BASE_CONTAINER as base
 
+# setup environment
+ENV CUDA_HOME="/usr/local/cuda"
+ENV PATH="/usr/local/cuda/bin:${PATH}"
+ENV LD_LIBRARY_PATH="/usr/local/cuda/lib64:${LD_LIBRARY_PATH}"
+ENV LLVM_CONFIG="/usr/bin/llvm-config-9"
+ARG MAKEFLAGS=-j$(nproc) 
+
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
@@ -25,13 +32,6 @@ RUN rm -rf /tmp/cmake-3.19.4/
 FROM base
 
 COPY --from=builder /cmake /cmake
-
-# setup environment
-ENV CUDA_HOME="/usr/local/cuda"
-ENV PATH="/usr/local/cuda/bin:${PATH}"
-ENV LD_LIBRARY_PATH="/usr/local/cuda/lib64:${LD_LIBRARY_PATH}"
-ENV LLVM_CONFIG="/usr/bin/llvm-config-9"
-ARG MAKEFLAGS=-j$(nproc) 
 
 # Install dependencies
 RUN apt-get update && \
