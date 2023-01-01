@@ -25,3 +25,9 @@
 - Build: `docker build -t hiennguyen9874/jetson-deepstream:deepstream-6.1.1-samples-opencv --build-arg BASE_CONTAINER=nvcr.io/nvidia/deepstream-l4t:6.1.1-samples -f Dockerfile.deepstream-6.1.1 .`
 
 - Push: `docker push hiennguyen9874/jetson-deepstream:deepstream-6.1.1-samples-opencv`
+
+## deepstream-l4t:6.1.1-triton
+
+- Build: `docker build -t hiennguyen9874/jetson-deepstream:deepstream-6.1.1-triton-opencv --build-arg BASE_CONTAINER=nvcr.io/nvidia/deepstream-l4t:6.1.1-triton -f Dockerfile.deepstream-6.1.1 .`
+
+- Push: `docker push hiennguyen9874/jetson-deepstream:deepstream-6.1.1-triton-opencv`
